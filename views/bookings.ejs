@@ -1,0 +1,20 @@
+<%- include("partials/header") %>
+<section class="form-card">
+  <h1>Your bookings</h1>
+  <% if (bookings.length === 0) { %>
+  <p>You don't have any bookings yet. Browse listings and book a stay.</p>
+  <% } else { %>
+  <div class="booking-list">
+    <% bookings.forEach((booking) => { %>
+    <div class="booking-card">
+      <h2><%= booking.listing.title %></h2>
+      <p><strong>Dates:</strong> <%= booking.startDate %> to <%= booking.endDate %></p>
+      <p><strong>Guests:</strong> <%= booking.guests %></p>
+      <p><strong>Total:</strong> $<%= booking.totalPrice %></p>
+      <p><strong>City:</strong> <%= booking.listing.city %></p>
+    </div>
+    <% }) %>
+  </div>
+  <% } %>
+</section>
+<%- include("partials/footer") %>

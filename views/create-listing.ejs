@@ -1,0 +1,25 @@
+<%- include("partials/header") %>
+<section class="form-card">
+  <h1>Create a new listing</h1>
+  <% if (error) { %>
+  <div class="alert"><%= error %></div>
+  <% } %>
+  <form action="/create-listing" method="post">
+    <label>Title</label>
+    <input type="text" name="title" required />
+    <label>Description</label>
+    <textarea name="description" rows="4" required></textarea>
+    <label>City</label>
+    <input type="text" name="city" required />
+    <label>Price per night</label>
+    <input type="number" name="pricePerNight" required />
+    <label>Max guests</label>
+    <input type="number" name="maxGuests" required />
+    <label>Image URL</label>
+    <input type="text" name="imageUrl" />
+    <label>Amenities (comma separated)</label>
+    <input type="text" name="amenities" />
+    <button type="submit">Create listing</button>
+  </form>
+</section>
+<%- include("partials/footer") %>

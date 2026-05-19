@@ -1,0 +1,33 @@
+<%- include("partials/header") %>
+<section class="listing-detail">
+  <div class="listing-media">
+    <img src="<%= listing.images[0] || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85' %>" alt="<%= listing.title %>" />
+  </div>
+  <div class="listing-info">
+    <h1><%= listing.title %></h1>
+    <p><%= listing.description %></p>
+    <p><strong>City:</strong> <%= listing.city %></p>
+    <p><strong>Price:</strong> $<%= listing.pricePerNight %> / night</p>
+    <p><strong>Max guests:</strong> <%= listing.maxGuests %></p>
+    <p><strong>Amenities:</strong> <%= listing.amenities.join(", ") %></p>
+  </div>
+</section>
+<section class="booking-panel">
+  <% if (error) { %>
+  <div class="alert"><%= error %></div>
+  <% } %>
+  <% if (!currentUser) { %>
+  <p>You must <a href="/login">login</a> to book this stay.</p>
+  <% } %>
+  <form action="/booking" method="post">
+    <input type="hidden" name="listingId" value="<%= listing.id %>" />
+    <label>Start date</label>
+    <input type="date" name="startDate" required />
+    <label>End date</label>
+    <input type="date" name="endDate" required />
+    <label>Guests</label>
+    <input type="number" name="guests" min="1" max="<%= listing.maxGuests %>" required />
+    <button type="submit" <%= !currentUser ? "disabled" : "" %>>Book now</button>
+  </form>
+</section>
+<%- include("partials/footer") %>
