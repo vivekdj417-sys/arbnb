@@ -1,50 +1,51 @@
 const express = require("express");
 const authMiddleware = require("../middleware/auth");
-const { bookings, listings, createBooking } = require("../data/store");
+const Booking = require("../models/Booking");
+const Listing = require("../models/Listing");
 
 const router = express.Router();
 
-router.get("/", authMiddleware, (req, res) => {
-  const userBookings = bookings.filter((booking) => booking.userId === req.user.id);
+router.get("/", authMiddleware, async (req, res) => {
+  const userBookings = await Booking.find({ userId: req.user.id }).populate("listingId");
   res.json(userBookings);
 });
 
-router.post("/", authMiddleware, (req, res) => {
+router.post("/", authMiddleware, async (req, res) => {
   const { listingId, startDate, endDate, guests } = req.body;
   if (!listingId || !startDate || !endDate || !guests) {
     return res.status(400).json({ error: "listingId, startDate, endDate, and guests are required" });
   }
 
-  const listing = listings.find((item) => item.id === Number(listingId));
+  const listing = await Listing.findById(listingId);
   if (!listing) {
     return res.status(404).json({ error: "Listing not found" });
   }
-  if (guests > listing.maxGuests) {
+  if (Number(guests) > listing.maxGuests) {
     return res.status(400).json({ error: "Guest count exceeds listing capacity" });
   }
 
-  const booking = createBooking({
-    listingId: listing.id,
+  const booking = await Booking.create({
+    listingId: listing._id,
     userId: req.user.id,
-    startDate,
-    endDate,
-    guests,
+    startDate: new Date(startDate),
+    endDate: new Date(endDate),
+    guests: Number(guests),
     totalPrice: Number(listing.pricePerNight) * calculateNights(startDate, endDate)
   });
 
   res.status(201).json(booking);
 });
 
-router.delete("/:id", authMiddleware, (req, res) => {
-  const bookingIndex = bookings.findIndex((booking) => booking.id === Number(req.params.id));
-  if (bookingIndex === -1) {
+router.delete("/:id", authMiddleware, async (req, res) => {
+  const booking = await Booking.findById(req.params.id);
+  if (!booking) {
     return res.status(404).json({ error: "Booking not found" });
   }
-  const booking = bookings[bookingIndex];
-  if (booking.userId !== req.user.id) {
+  if (booking.userId.toString() !== req.user.id) {
     return res.status(403).json({ error: "You are not allowed to cancel this booking" });
   }
-  bookings.splice(bookingIndex, 1);
+
+  await booking.deleteOne();
   res.json({ message: "Booking canceled" });
 });
 

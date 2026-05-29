@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const session = require("express-session");
+const connectDB = require("./db");
 
 const authRoutes = require("./routes/auth");
 const listingsRoutes = require("./routes/listings");
@@ -47,6 +48,14 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+
+connectDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error("MongoDB connection failed:", error);
+    process.exit(1);
+  });
