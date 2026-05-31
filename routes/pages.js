@@ -1,5 +1,6 @@
 const express = require("express");
 const pageController = require("../controllers/pageController");
+const authController = require("../controllers/authController");
 
 const router = express.Router();
 
@@ -12,10 +13,10 @@ function requireLogin(req, res, next) {
 
 router.get("/", pageController.home);
 router.get("/login", pageController.loginPage);
-router.post("/login", pageController.loginSubmit);
+router.post("/login", authController.loginSubmit);
 router.get("/register", pageController.registerPage);
-router.post("/register", pageController.registerSubmit);
-router.get("/logout", pageController.logout);
+router.post("/register", authController.registerSubmit);
+router.get("/logout", authController.logout);
 router.get("/listing/:id", pageController.listingPage);
 router.post("/booking", requireLogin, pageController.bookingSubmit);
 router.get("/bookings", requireLogin, pageController.viewBookings);

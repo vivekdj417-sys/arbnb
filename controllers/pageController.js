@@ -1,5 +1,3 @@
-const bcrypt = require("bcryptjs");
-const User = require("../models/User");
 const Listing = require("../models/Listing");
 const Booking = require("../models/Booking");
 
@@ -18,54 +16,6 @@ function loginPage(req, res) {
 
 function registerPage(req, res) {
   res.render("register", { error: null });
-}
-
-async function loginSubmit(req, res, next) {
-  try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email: email.toLowerCase() });
-    if (!user || !bcrypt.compareSync(password, user.password)) {
-      return res.render("login", { error: "Invalid email or password" });
-    }
-
-    req.session.user = { id: user._id.toString(), name: user.name, email: user.email, role: user.role };
-    res.redirect("/");
-  } catch (error) {
-    next(error);
-  }
-}
-
-async function registerSubmit(req, res, next) {
-  try {
-    const { name, email, password } = req.body;
-    if (!name || !email || !password) {
-      return res.render("register", { error: "All fields are required" });
-    }
-
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
-    if (existingUser) {
-      return res.render("register", { error: "Email already in use" });
-    }
-
-    const hashedPassword = bcrypt.hashSync(password, 10);
-    const user = await User.create({
-      name,
-      email: email.toLowerCase(),
-      password: hashedPassword,
-      role: "guest"
-    });
-
-    req.session.user = { id: user._id.toString(), name: user.name, email: user.email, role: user.role };
-    res.redirect("/");
-  } catch (error) {
-    next(error);
-  }
-}
-
-function logout(req, res) {
-  req.session.destroy(() => {
-    res.redirect("/");
-  });
 }
 
 async function listingPage(req, res, next) {
@@ -151,9 +101,6 @@ module.exports = {
   home,
   loginPage,
   registerPage,
-  loginSubmit,
-  registerSubmit,
-  logout,
   listingPage,
   bookingSubmit,
   viewBookings,
