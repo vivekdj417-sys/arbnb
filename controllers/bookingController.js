@@ -1,13 +1,6 @@
 const Booking = require("../models/Booking");
 const Listing = require("../models/Listing");
 
-function calculateNights(startDate, endDate) {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  const msPerDay = 24 * 60 * 60 * 1000;
-  return Math.max(1, Math.ceil((end - start) / msPerDay));
-}
-
 async function getBookings(req, res, next) {
   try {
     const userBookings = await Booking.find({ userId: req.user.id }).populate("listingId");
@@ -32,13 +25,17 @@ async function createBooking(req, res, next) {
       return res.status(400).json({ error: "Guest count exceeds listing capacity" });
     }
 
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const nights = Math.max(1, Math.ceil((end - start) / (24 * 60 * 60 * 1000)));
+
     const booking = await Booking.create({
       listingId: listing._id,
       userId: req.user.id,
-      startDate: new Date(startDate),
-      endDate: new Date(endDate),
+      startDate: start,
+      endDate: end,
       guests: Number(guests),
-      totalPrice: Number(listing.pricePerNight) * calculateNights(startDate, endDate)
+      totalPrice: Number(listing.pricePerNight) * nights
     });
 
     res.status(201).json(booking);
